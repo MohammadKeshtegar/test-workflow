@@ -1,0 +1,30 @@
+name: Lint Python Code
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout your code (including the main.py file)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Python (you can change the version if needed)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'    # or 3.11, 3.13, etc.
+
+      # 3. Install the ultra-fast linter: ruff
+      - name: Install ruff
+        run: pip install ruff
+
+      # 4. Run the linter on all Python files
+      - name: Run ruff linting
+        run: ruff check .
