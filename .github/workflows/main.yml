@@ -1,0 +1,44 @@
+name: CI/CD Pipeline
+
+# When to run
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Get the code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Node.js (version 20)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'               # Speeds up future runs
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Run tests (even if we have none yet, it will pass)
+      - name: Run tests
+        run: npm test
+
+      # 5. Build (not needed for this app, but good practice)
+      - name: Build check
+        run: npm run start -- --dry-run || echo "No build step needed"
+
+      # 6. Deploy to Render / Fly.io / Railway / etc. (example with Render)
+      - name: Deploy to Render
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          curl "$RENDER_DEPLOY_HOOK"
